@@ -1,0 +1,167 @@
+transactions = [
+    ["Milk", "Bread"],
+    ["Eggs", "Juice", "Cheese"],
+    ["Vegetables"],
+    ["Bread", "Butter", "Juice", "Milk"],
+    ["Eggs", "Milk"],
+    # ["Fruits", "Cheese"],
+    # ["Juice"],
+    # ["Cheese", "Vegetables", "Eggs", "Butter"],
+    # ["Milk", "Juice"],
+    # ["Bread", "Eggs"],
+    # ["Vegetables", "Cheese", "Milk", "Juice"],
+    # ["Fruits", "Bread"],
+    # ["Eggs", "Butter", "Cheese", "Milk"],
+    # ["Milk"],
+    # ["Juice", "Eggs", "Vegetables", "Bread"],
+    # ["Butter", "Cheese"],
+    # ["Bread", "Juice"],
+    # ["Fruits", "Vegetables", "Milk", "Eggs"],
+    # ["Cheese"],
+    # ["Juice", "Eggs", "Fruits", "Butter"],
+    # ["Milk", "Vegetables"],
+    # ["Bread", "Butter", "Juice", "Eggs"],
+    # ["Eggs"],
+    # ["Vegetables", "Cheese", "Bread", "Milk"],
+    # ["Juice"],
+    # ["Cheese", "Vegetables", "Eggs", "Butter", "Juice"],
+    # ["Milk", "Juice"],
+    # ["Bread"],
+    # ["Vegetables", "Cheese", "Milk"],
+    # ["Fruits", "Bread", "Juice", "Eggs"],
+    # ["Eggs", "Butter"],
+    # ["Milk", "Bread", "Fruits", "Juice"],
+    # ["Juice", "Eggs"],
+    # ["Butter", "Cheese", "Milk", "Vegetables"],
+    # ["Bread", "Juice"],
+    # ["Fruits"],
+    # ["Cheese", "Bread", "Butter"],
+    # ["Juice", "Eggs", "Fruits"],
+    # ["Milk"],
+    # ["Bread", "Butter", "Juice", "Eggs", "Vegetables"],
+    # ["Eggs", "Milk"],
+    # ["Vegetables", "Cheese", "Bread"],
+    # ["Juice"],
+    # ["Cheese", "Vegetables"],
+    # ["Milk", "Juice", "Fruits"],
+    # ["Bread", "Eggs", "Butter"],
+    # ["Vegetables", "Cheese"],
+    # ["Fruits", "Bread"],
+    # ["Eggs", "Butter", "Cheese", "Milk"],
+    # ["Milk", "Bread"],
+    # ["Juice", "Eggs", "Vegetables"],
+    # ["Butter"],
+    # ["Bread", "Juice"],
+    # ["Fruits", "Vegetables", "Milk", "Cheese"],
+    # ["Cheese"],
+    # ["Juice", "Eggs", "Fruits"],
+    # ["Milk", "Vegetables", "Bread"],
+    # ["Bread", "Butter"],
+    # ["Eggs", "Milk"],
+    # ["Vegetables", "Cheese", "Juice"],
+    # ["Juice", "Milk"],
+    # ["Cheese", "Vegetables", "Eggs", "Bread"],
+    # ["Milk"],
+    # ["Bread", "Eggs"],
+    # ["Vegetables", "Cheese", "Milk", "Juice"],
+    # ["Fruits", "Bread"],
+    # ["Eggs", "Butter", "Cheese", "Milk", "Juice"],
+    # ["Milk", "Bread"],
+    # ["Juice", "Eggs", "Vegetables"],
+    # ["Butter", "Cheese"],
+    # ["Bread", "Juice"],
+    # ["Fruits", "Vegetables"],
+    # ["Cheese"],
+    # ["Juice", "Eggs", "Fruits", "Milk"],
+    # ["Milk"],
+    # ["Bread", "Butter", "Juice", "Eggs", "Vegetables"],
+    # ["Eggs", "Milk"],
+    # ["Vegetables", "Cheese", "Bread", "Juice"],
+    # ["Juice"],
+    # ["Cheese", "Vegetables"],
+    # ["Milk", "Juice"],
+    # ["Bread", "Eggs"],
+    # ["Vegetables", "Cheese", "Milk"],
+    # ["Fruits", "Bread"],
+    # ["Eggs", "Butter", "Cheese"],
+    # ["Milk", "Bread"],
+    # ["Juice", "Eggs", "Vegetables"],
+    # ["Butter"],
+    # ["Cheese", "Milk"],
+    # ["Bread", "Juice"],
+    # ["Fruits", "Vegetables"],
+    # ["Cheese"],
+    # ["Juice", "Eggs", "Fruits"],
+    # ["Milk"],
+    # ["Vegetables", "Bread", "Butter"],
+    # ["Eggs", "Milk"],
+    # ["Juice"]
+]
+
+
+# CLass for representing Tree Node
+class FPTreeNode:
+    def _init_(self, item, count): 
+        self.item=item  # item name
+        self.count=count  # frequency count
+        self.children={}  # dictionary for storing child nodes
+
+# function for preprocessing list as per minimum support threshold
+def pre_process(list, min_support):
+    support={}
+    for i in list:
+        for j in i:
+            if j in support:
+                support[j]=support[j]+1
+            else:
+                support[j]=1
+    print("Support count before sorting: ",support)
+    print()
+    sorted_support=dict(sorted(support.items(), key=lambda item: item[1], reverse=True)) #sorting in descending order
+    for key in support:
+        if sorted_support[key] < min_support:
+            del sorted_support[key]
+    print("Support count : ",sorted_support)
+    print()
+    list2=[] # new list for storing items having support count greater than or equal to min_support
+    for sub_list in list:
+        sub_list2=[]
+        for i in sorted_support:
+            if i in sub_list:
+                sub_list2.append(i)
+        list2.append(sub_list2)
+    return list2
+
+# recurssive function to create tree
+def create_tree(root, processed_list, i, j):
+    if(j>=len(processed_list[i])):
+        return
+    if processed_list[i][j] in root.children:
+        root=root.children[processed_list[i][j]]
+        root.count=root.count+1
+    else:
+        new_node=FPTreeNode(processed_list[i][j], 1)
+        root.children[processed_list[i][j]]=new_node
+        root=new_node
+    create_tree(root, processed_list, i, j+1)
+
+# function to print Frequent Pattern Tree
+def print_tree(node, indent=0):
+    if node.item is not None:
+        print("|  " * indent + f"-{node.item} ({node.count})")
+    for child in node.children.values():
+        print_tree(child, indent + 1)
+
+# function for calling above functions accordingly
+def construct_FPTree(transactions, min_support):
+    processed_list=pre_process(transactions, min_support)
+    print(processed_list)
+    print()
+    root=FPTreeNode("Root", 0)
+
+    for i in range(len(processed_list)):
+        create_tree(root, processed_list, i, 0)
+    print_tree(root)
+
+
+construct_FPTree(transactions, 2) #Execution Starts from here
